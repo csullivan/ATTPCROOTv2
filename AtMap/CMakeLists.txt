@@ -8,38 +8,29 @@
 # Create a library called "libAtTpc" which includes the source files given in
 # the array .
 # The extension is already found.  Any number of sources could be listed here.
-
-set(INCLUDE_DIRECTORIES
-${ROOT_INCLUDE_DIR}
-${Boost_INCLUDE_DIRS}
-${BASE_INCLUDE_DIRECTORIES}
-#put here all directories where header files are located
-${CMAKE_SOURCE_DIR}/AtMap
-
-
-)
-
-include_directories( ${INCLUDE_DIRECTORIES})
-
-set(LINK_DIRECTORIES
-${ROOT_LIBRARY_DIR}
-${FAIRROOT_LIBRARY_DIR}
-
-) 
-
-link_directories( ${LINK_DIRECTORIES})
+Set(LIBRARY_NAME AtMap)
+Set(LINKDEF ${LIBRARY_NAME}LinkDef.h)
 
 set(SRCS
 #Put here your sourcefiles
+AtMap.cxx
 AtTpcMap.cxx
 AtTpcProtoMap.cxx
-
+AtGadgetIIMap.cxx
+AtSpecMATMap.cxx
+AtPadReference.cxx
 )
 
-Set(LINKDEF AtTpcMapLinkDef.h)
-Set(LIBRARY_NAME AtTpcMap)
 Set(DEPENDENCIES
-    Base
-)
+  FairRoot::FairTools
+  ROOT::XMLParser
+  ROOT::Core
 
-GENERATE_LIBRARY()
+  Boost::headers
+  )
+
+generate_target_and_root_library(${LIBRARY_NAME}
+  LINKDEF ${LINKDEF}
+  SRCS ${SRCS}
+  DEPS_PUBLIC ${DEPENDENCIES}
+  )

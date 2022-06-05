@@ -1,32 +1,43 @@
- # Create a library called "libAtData" 
+Set(LIBRARY_NAME AtData)
+Set(LINKDEF ${LIBRARY_NAME}LinkDef.h)
 
-set(INCLUDE_DIRECTORIES
-${ROOT_INCLUDE_DIR}
-${Boost_INCLUDE_DIRS}
-${BASE_INCLUDE_DIRECTORIES}
-${CMAKE_SOURCE_DIR}/AtData
-)
+Set(DEPENDENCIES
+  FairRoot::FairTools
 
-include_directories( ${INCLUDE_DIRECTORIES})
-
-set(LINK_DIRECTORIES
-${ROOT_LIBRARY_DIR}
-${FAIRROOT_LIBRARY_DIR}
-${CMAKE_SOURCE_DIR}/AtData
-
-)
- 
-link_directories( ${LINK_DIRECTORIES})
+  ROOT::Core
+  ROOT::XMLParser
+  ROOT::GenVector
+  ROOT::Physics #For TVector3
+  ROOT::Eve
+  )
 
 set(SRCS
-AtStack.cxx 
-AtMCTrack.cxx
-)
+  # Add all the source files below this line. Those must have cxx for their extension.
 
-Set(HEADERS )
-Set(LINKDEF MCStackLinkDef.h)
-Set(LIBRARY_NAME AtData)
-Set(DEPENDENCIES Base EG Physics Cling Core )
+  AtPad.cxx
+  AtAuxPad.cxx
+  AtPadFFT.cxx
+  AtRawEvent.cxx
+  AtHit.cxx
+  AtHitCluster.cxx
+  AtEvent.cxx
+  AtProtoEvent.cxx
+  AtProtoEventAna.cxx
+  AtTrackingEventAna.cxx
+  AtPatternEvent.cxx
+  AtProtoQuadrant.cxx
+  AtTrack.cxx
 
-GENERATE_LIBRARY()
+  AtPattern/AtPattern.cxx
+  AtPattern/AtPatternLine.cxx
+  AtPattern/AtPatternCircle2D.cxx
+  AtPattern/AtPatternY.cxx
+  AtPattern/AtPatternTypes.cxx
+  )
 
+generate_target_and_root_library(${LIBRARY_NAME}
+  LINKDEF ${LINKDEF}
+  SRCS ${SRCS}
+  DEPS_PUBLIC ${DEPENDENCIES}
+  INCLUDE_DIR ${CMAKE_SOURCE_DIR}/AtData/AtPattern
+  )

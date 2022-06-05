@@ -1,7 +1,19 @@
-void run_unpack2
-(TString dataFile = "runfiles/ar46_run_0085.txt",TString parameterFile = "ATTPC.e15503b.par",
-TString mappath="/data/ar46/run_0085/")
+#define cRED "\033[1;31m"
+#define cYELLOW "\033[1;33m"
+#define cNORMAL "\033[0m"
+#define cGREEN "\033[1;32m"
+
+bool check_file(const std::string& name);
+
+void run_unpack2(TString dataFile = "runfiles/NSCL/Ar46/ar46_run_0167.txt",TString parameterFile = "ATTPC.e15503b.par",TString mappath="../../")
 {
+
+  if(!check_file(dataFile.Data())){
+    std::cout<<cRED<<" Run file "<<dataFile.Data()<<" not found! Terminating..."<<cNORMAL<<std::endl;
+    exit(0);
+  }
+
+
 
   // -----   Timer   --------------------------------------------------------
  TStopwatch timer;
@@ -20,7 +32,7 @@ TString mappath="/data/ar46/run_0085/")
 
   //TString inputFile   = dataDir + name + ".digi.root";
   //TString outputFile  = dataDir + "output.root";
-  TString outputFile  = "output.root";
+  TString outputFile  = "run_100.root";
   //TString mcParFile   = dataDir + name + ".params.root";
   TString loggerFile  = dataDir + "ATTPCLog.log";
   TString digiParFile = dir + "/parameters/" + parameterFile;
@@ -75,6 +87,7 @@ TString mappath="/data/ar46/run_0085/")
   //fDecoderTask -> SetPositivePolarity(kTRUE);
   fDecoderTask -> SetPersistence(kFALSE);
   fDecoderTask -> SetMap(scriptdir.Data());
+  fDecoderTask -> SetNumCobo(10);
   fDecoderTask -> SetInhibitMaps(inimap,lowgmap,xtalkmap); // TODO: Only implemented for fUseSeparatedData!!!!!!!!!!!!!!!!!!!1
   fDecoderTask -> SetMapOpt(0); // ATTPC : 0  - Prototype: 1 |||| Default value = 0
 
@@ -86,12 +99,20 @@ TString mappath="/data/ar46/run_0085/")
     TString dataFileWithPath;
     Int_t iCobo = 0;
     while (dataFileWithPath.ReadLine(listFile)) {
-        if (dataFileWithPath.Contains(Form("CoBo%i",iCobo)) )
-              fDecoderTask -> AddData(dataFileWithPath, iCobo);
-        else{
-          iCobo++;
-          fDecoderTask -> AddData(dataFileWithPath, iCobo);
-        }
+
+      if(!check_file(dataFileWithPath.Data())){
+        std::cout<<cRED<<" GRAW file "<<dataFileWithPath.Data()<<" not found! Terminating..."<<cNORMAL<<std::endl;
+        exit(0);
+      }else{
+
+              if (dataFileWithPath.Contains(Form("CoBo%i",iCobo)) )
+                    fDecoderTask -> AddData(dataFileWithPath, iCobo);
+              else{
+                iCobo++;
+                fDecoderTask -> AddData(dataFileWithPath, iCobo);
+              }
+      }
+
     }
   }
 
@@ -100,27 +121,27 @@ TString mappath="/data/ar46/run_0085/")
   ATPSATask *psaTask = new ATPSATask();
   psaTask -> SetPersistence(kTRUE);
   psaTask -> SetThreshold(20);
-  psaTask -> SetPSAMode(1); //NB: 1 is ATTPC - 2 is pATTPC
+  psaTask -> SetPSAMode(3); //NB: 1 is ATTPC - 2 is pATTPC
 	//psaTask -> SetPeakFinder(); //NB: Use either peak finder of maximum finder but not both at the same time
 	psaTask -> SetMaxFinder();
   psaTask -> SetBaseCorrection(kTRUE); //Directly apply the base line correction to the pulse amplitude to correct for the mesh induction. If false the correction is just saved
-  psaTask -> SetTimeCorrection(kFALSE); //Interpolation around the maximum of the signal peak
+  psaTask -> SetTimeCorrection(kTRUE); //Interpolation around the maximum of the signal peak. Only affect Z calibration at PSA stage
   run -> AddTask(psaTask);
 
-  ATHoughTask *HoughTask = new ATHoughTask();
+  /*ATHoughTask *HoughTask = new ATHoughTask();
 	HoughTask ->SetPersistence();
 	//HoughTask ->SetLinearHough();
 	HoughTask ->SetCircularHough();
   HoughTask ->SetHoughThreshold(100.0); // Charge threshold for Hough
-  HoughTask ->SetEnableMap(); //Enables an instance of the ATTPC map
+  HoughTask ->SetEnableMap(); //Enables an instance of the ATTPC map:  This enables the MC with Q instead of position
   HoughTask ->SetMap(scriptdir.Data());
-	run -> AddTask(HoughTask);
+	run -> AddTask(HoughTask);*/
 
 
   run -> Init();
 
-  run -> RunOnTBData();
-  //run->Run(0,10);
+  //run -> RunOnTBData();
+  run->Run(0,1000);
 
   std::cout << std::endl << std::endl;
   std::cout << "Macro finished succesfully."  << std::endl << std::endl;
@@ -136,6 +157,11 @@ TString mappath="/data/ar46/run_0085/")
 
   gApplication->Terminate();
 
+}
+
+bool check_file(const std::string& name) {
+  struct stat buffer;
+  return (stat (name.c_str(), &buffer) == 0);
 }
 
 /*fDecoderTask -> AddData("/home/ayyadlim/Desktop/ATTPC/run_0122/CoBo0_run_0122_14-08-15_13h27m28s.graw",0);
