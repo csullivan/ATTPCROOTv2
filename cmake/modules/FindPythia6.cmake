@@ -1,43 +1,31 @@
- ################################################################################
- #    Copyright (C) 2014 GSI Helmholtzzentrum fuer Schwerionenforschung GmbH    #
- #                                                                              #
- #              This software is distributed under the terms of the             # 
- #         GNU Lesser General Public Licence version 3 (LGPL) version 3,        #  
- #                  copied verbatim in the file "LICENSE"                       #
- ################################################################################
-# - Try to find PLUTO instalation
-# Once done this will define
-#
-#  Pythia6_FOUND - system has Pythia6
-#  Pythia6_LIBRARY_DIR - The libraries directory for Pythia6
-#
+################################################################################
+# Copyright (C) 2014-2019 GSI Helmholtzzentrum fuer Schwerionenforschung GmbH  #
+#                                                                              #
+#              This software is distributed under the terms of the             #
+#              GNU Lesser General Public Licence (LGPL) version 3,             #
+#                  copied verbatim in the file "LICENSE"                       #
+################################################################################
 
-if (Pythia6_LIBRARY_DIR)
-  SET (Pythia6_LIBRARY_DIR Pythia6_LIBRARY_DIR-NOTFOUND)
-endif (Pythia6_LIBRARY_DIR)
+find_library(Pythia6_LIBRARY
+  NAMES Pythia6 pythia6
+  HINTS $ENV{SIMPATH}
+  PATH_SUFFIXES lib)
 
-MESSAGE(STATUS "Looking for Pythia6...")
-
-FIND_PATH(Pythia6_LIBRARY_DIR NAMES libPythia6.so PATHS
-  ${Pythia6_DIR}/lib
-  ${AlFa_DIR}/lib
-  ${SIMPATH}/lib
-  ${SIMPATH}/generators/lib
-  NO_DEFAULT_PATH
+include(FindPackageHandleStandardArgs)
+find_package_handle_standard_args(Pythia6
+  REQUIRED_VARS Pythia6_LIBRARY
 )
 
-if (Pythia6_LIBRARY_DIR)
-  set(Pythia6_FOUND TRUE)
-endif(Pythia6_LIBRARY_DIR)
+if(Pythia6_FOUND)
+  get_filename_component(Pythia6_LIBRARY_DIR ${Pythia6_LIBRARY} DIRECTORY)
+  get_filename_component(Pythia6_PREFIX ${Pythia6_LIBRARY_DIR}/.. ABSOLUTE)
 
-if (Pythia6_FOUND)
-  if (NOT Pythia6_FIND_QUIETLY)     
-    MESSAGE(STATUS "Looking for Pythia6... - found ${Pythia6_LIBRARY_DIR}")
-    SET(LD_LIBRARY_PATH ${LD_LIBRARY_PATH} ${Pythia6_LIBRARY_DIR})
-  endif (NOT Pythia6_FIND_QUIETLY)
-else (Pythia6_FOUND)
-  if (Pythia6_FIND_REQUIRED)
-    message(FATAL_ERROR "Looking for Pythia6... - Not found")
-  endif (Pythia6_FIND_REQUIRED)
-endif (Pythia6_FOUND)
-
+  if(NOT TARGET Pythia6)
+    add_library(Pythia6 UNKNOWN IMPORTED GLOBAL)
+    set_target_properties(Pythia6 PROPERTIES
+      IMPORTED_LOCATION ${Pythia6_LIBRARY}
+      )
+    # Requires CMake 3.15
+    #add_library(Pythia6::Pythia6 ALIAS Pythia6) 
+  endif()
+endif()

@@ -1,53 +1,55 @@
 /*********************************************************************
-*   ATTPC Mapping Class	AtTpcProtoMap.h			             *	
-*   Author: Y. Ayyad            				     *
-*   Log: 31-03-2015 11:42 JST					     *
-*								     *	
-*********************************************************************/
+ *   ATTPC Mapping Class	AtTpcProtoMap.h			             *
+ *   Author: Y. Ayyad            				     *
+ *   Log: 31-03-2015 11:42 JST					     *
+ *								     *
+ *********************************************************************/
 //#pragma once
 #ifndef ATTPCPROTOMAP_H
 #define ATTPCPROTOMAP_H
 
-#include "AtTpcMap.h"
-#include "TFile.h"
-#include "TH2Poly.h"
-#include <vector>
-#include <fstream>
+#include "AtMap.h"
+
+#include <Math/Point2Dfwd.h>
+#include <Rtypes.h>
+#include <TString.h>
+
 #include <map>
+#include <vector>
 
+class TBuffer;
+class TClass;
+class TFile;
+class TH2Poly;
+class TMemberInspector;
 
-class AtTpcProtoMap : public AtTpcMap 
-{
-   public:
-	AtTpcProtoMap();
-	~AtTpcProtoMap();
+class AtTpcProtoMap : public AtMap {
+protected:
+   TFile *f{}; // Raw pointer, owned by gROOT
+   Int_t bin{};
 
-	void Initialize();
-        void GenerateATTPC();
-        TH2Poly* GetATTPCPlane();
-        TH2Poly* GetATTPCPlane(TString TH2Poly_name);
-        Bool_t SetGeoFile(TString geofile);
-        std::vector<Float_t> CalcPadCenter(Int_t PadRef);
-        Bool_t SetProtoMap(TString file);
-        Int_t BinToPad(Int_t binval);
+   Bool_t kIsFileSet = false;
+   Bool_t kIsGenerated = false;
+   Bool_t kIsProtoMapSet = false;
 
-        TFile *f;
-        TH2Poly *hProto;
-        Int_t bin;
+   std::map<Int_t, std::vector<Float_t>> ProtoGeoMap;
+   std::map<Int_t, Int_t> ProtoBinMap;
 
-        Bool_t kIsFileSet;
-        Bool_t kIsGenerated;
-        Bool_t kIsProtoMapSet;
+public:
+   AtTpcProtoMap();
+   ~AtTpcProtoMap() = default;
 
+   virtual void GeneratePadPlane() override;
+   virtual void Dump() override;
+   virtual ROOT::Math::XYPoint CalcPadCenter(Int_t PadRef) override;
+   virtual TH2Poly *GetPadPlane() override;
+   virtual Int_t BinToPad(Int_t binval) override;
+   TH2Poly *GetAtTpcPlane(TString TH2Poly_name);
 
-        std::ifstream *InProtoMap;
-	    std::map<Int_t,std::vector<Float_t>> ProtoGeoMap;
-        std::map<Int_t,Int_t> ProtoBinMap;        
+   Bool_t SetGeoFile(TString geofile);
+   Bool_t SetProtoMap(TString file);
 
-
-   ClassDef(AtTpcProtoMap,1);
-
+   ClassDefOverride(AtTpcProtoMap, 2);
 };
 
 #endif
-

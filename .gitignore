@@ -1,10 +1,16 @@
 *.swp
 *.root
 *.log
+*.graw
 gphysi.dat
 core_dump*
 build
 !*/build
+data
+.vscode
+*~
+*#*
+event.dat
 
 # Executables
 *.exe
@@ -29,6 +35,12 @@ build
 *.la
 *.a
 
+# Compressed packages
+*.tar.bz2
+*.tar.gz
+*.zip
+
+
 # CMake
 CMakeCache.txt
 CMakeFiles
@@ -39,3 +51,5 @@ doxygen/html
 doxygen/latex
 macros/data
 .DS_Store
+.nfs*
+compiled/E20009Analysis/.NabinWorkDir/
