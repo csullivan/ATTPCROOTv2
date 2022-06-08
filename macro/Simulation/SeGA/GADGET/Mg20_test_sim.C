@@ -37,7 +37,7 @@ void Mg20_test_sim(Int_t nEvents = 20, TString mcEngine = "TGeant4")
    /*FairModule* pipe = new AtPipe("Pipe");
    run->AddModule(pipe);*/
 
-   FairDetector *SeGA = new AtSeGA("SeGA", kTRUE);
+   FairDetector *SeGA = new AtSeGA("AtSeGA", kTRUE);
    SeGA->SetGeometryFileName("SeGA.root");
    // ATTPC->SetModifyGeometry(kTRUE);
    run->AddModule(SeGA);
@@ -47,11 +47,28 @@ void Mg20_test_sim(Int_t nEvents = 20, TString mcEngine = "TGeant4")
    // -----   Create PrimaryGenerator   --------------------------------------
    FairPrimaryGenerator *primGen = new FairPrimaryGenerator();
 
-   AtTPC20MgDecay *decay = new AtTPC20MgDecay();
-   decay->SetBoxXYZ(-0.1, 0.1, -0.1, 0.1, 9.9, 10.1);
-   primGen->AddGenerator(gamma);
+   Double_t pdgId = 22;       // 22 for gamma emission, 2212 for proton emission
+     Double_t theta1 = 0.;      // polar angle distribution: lower edge (50)
+     Double_t theta2 = 180.;    // polar angle distribution: upper edge (51)
+     Double_t momentum = 0.001; // GeV/c
+     Int_t multiplicity = 1;
+     ATTPCGammaDummyGenerator* gammasGen = new ATTPCGammaDummyGenerator(pdgId, multiplicity);
+     gammasGen->SetThetaRange(theta1, theta2);
+     gammasGen->SetCosTheta();
+     gammasGen->SetPRange(momentum, momentum);
+     //gammasGen->SetDecayChainPoint(0.000513,0.1);
+     //gammasGen->SetDecayChainPoint(0.000854,0.5);
+     //gammasGen->SetDecayChainPoint(0.001561,0.1);
+     //gammasGen->SetDecayChainPoint(0.002002,0.1);
+     //gammasGen->SetDecayChainPoint(0.003750,0.2);
+     gammasGen->SetPhiRange(0., 360.); //(2.5,4)
+     gammasGen->SetBoxXYZ(-0.1, 0.1, -0.1, 0.1, -0.1, 0.1);
+     gammasGen->SetLorentzBoost(0.0); // for instance beta=0.8197505718204776 for 700 A MeV
+     // add the gamma generator
+     primGen->AddGenerator(gammasGen);
 
-   run->SetGenerator(primGen);
+
+     run->SetGenerator(primGen);
 
    // ------------------------------------------------------------------------
 
