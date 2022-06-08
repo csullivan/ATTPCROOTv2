@@ -52,7 +52,7 @@ void Mg20_test_sim(Int_t nEvents = 20, TString mcEngine = "TGeant4")
      Double_t theta2 = 180.;    // polar angle distribution: upper edge (51)
      Double_t momentum = 0.001; // GeV/c
      Int_t multiplicity = 1;
-     ATTPCGammaDummyGenerator* gammasGen = new ATTPCGammaDummyGenerator(pdgId, multiplicity);
+     AtTPCGammaDummyGenerator* gammasGen = new AtTPCGammaDummyGenerator(pdgId, multiplicity);
      gammasGen->SetThetaRange(theta1, theta2);
      gammasGen->SetCosTheta();
      gammasGen->SetPRange(momentum, momentum);
